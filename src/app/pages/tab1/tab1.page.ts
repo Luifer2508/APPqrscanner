@@ -1,6 +1,8 @@
 import { AfterViewInit, Component } from '@angular/core';
 import { BarcodeScanner } from '@capacitor-community/barcode-scanner';
 import { AlertController, Platform } from '@ionic/angular';
+import { Registros } from 'src/app/interfaces';
+import { Registro } from 'src/app/Models/registro.model';
 import { DataLocalService } from 'src/app/services/data-local.service';
 
 
@@ -10,79 +12,96 @@ import { DataLocalService } from 'src/app/services/data-local.service';
   templateUrl: 'tab1.page.html',
   styleUrls: ['tab1.page.scss']
 })
-export class Tab1Page implements AfterViewInit {
+export class Tab1Page implements AfterViewInit{
 
-  scanActive:boolean = false;
+  
+
+  scanActivo: boolean = false;
+  public registros: Registros[] = [];
 
   constructor(
-    private alertCtrl:AlertController, 
     private platform:Platform,
-    private dataLocalService:DataLocalService
-    
+    private alertCtrll:AlertController,
+    private dataLocalService:DataLocalService,
+
     ) {}
 
   ngAfterViewInit(): void {
-    if(this.platform.is('capacitor')){
+    if (this.platform.is("capacitor")){
       BarcodeScanner.prepare();
     }
   }
 
   async scan(){
+    console.log(this.platform)
     if(this.platform.is('capacitor')){
-      console.log("Comenzando a escanear");
-      const allowed = await this.checkPermisos();
-      if (allowed){
-        this.scanActive = true;
+
+      console.log(status);
+      const permitido =  await this.checkPermission();
+
+      if(permitido){
+
+        this.scanActivo = true;
         const result = await BarcodeScanner.startScan();
-        if (result.hasContent) {
-          console.log(result.content);
-          this.dataLocalService.guardarRegistro(result.format, result.content)
-          this.scanActive = false;
+
+        if(result.hasContent){
+
+          console.log(result);
+          const registro: Registro = new Registro(result.format,result.content);
+          this.dataLocalService.abrirRegistro(registro);
+          this.dataLocalService.guardarRegistro(registro);
+          this.scanActivo = false;
+
         }
+
+
       }
+
+    }else{
+      console.log('Estamos en la web');
+      const registro: Registro = new Registro('QR_CODE', 'https://www.metacritic.com/game');
+      this.dataLocalService.abrirRegistro(registro);
+      this.dataLocalService.guardarRegistro(registro);
+      this.scanActivo = false;
     }
-    else
-    {
-      console.log("Corriendo en web");
-      this.dataLocalService.guardarRegistro('geo','geo:40.787769727703 , -74.03857695380083')
-    }
-    
+
   }
 
-  checkPermisos(){
-    return new Promise(async (resolve, reject)=>{
-      const status = await BarcodeScanner.checkPermission({force:true});
-      if(status.granted)
-      {
+  async checkPermission(){
+
+    return new Promise (async (resolve, reject) => {
+      const status = await BarcodeScanner.checkPermission({force: true});
+      if(status.granted){
         resolve(true);
-      }
-      else if(status.denied)
-      {
-        const alert = await this.alertCtrl.create({
-          header:'Sin permisos',
-          message:'Por favor permita el acceso a la camara en sus preferencias',
-          buttons: [
+      }else if (status.denied){
+
+        const alert = await this.alertCtrll.create({
+          header: "Sin Permisos",
+          message: "Por favor permita el acceso a la camara en sus preferencias",
+          buttons:[
             {
-              text: 'No',
-              role: 'Cancel'
+              text:"No",
+              role: "cancel"
             },
             {
-              text: 'Abrir preferencias',
+              text: "Abrir Preferencias",
               handler:()=>{
                 BarcodeScanner.openAppSettings(),
                 resolve(false)
               }
             }
-          ]
-        });
+          ],
 
+        });
         await alert.present();
-      }
-      else
-      {
+
+      }else{
         resolve(reject);
       }
     })
+
+
   }
+
 
 }

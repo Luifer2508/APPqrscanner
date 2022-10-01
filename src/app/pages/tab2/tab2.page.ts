@@ -1,7 +1,9 @@
-import { Component } from '@angular/core';
-import { NewRegistro } from 'src/app/interfaces';
-import { Registro } from 'src/app/models/registro.model';
+import { Component, Input } from '@angular/core';
+import { Registros } from 'src/app/interfaces';
+import { Registro } from 'src/app/Models/registro.model';
 import { DataLocalService } from 'src/app/services/data-local.service';
+
+
 
 @Component({
   selector: 'app-tab2',
@@ -10,16 +12,18 @@ import { DataLocalService } from 'src/app/services/data-local.service';
 })
 export class Tab2Page {
 
-  get registros():Registro[]{
-    return this.dataLocalService.getRegistroLocal;
+
+
+  get registros(): Registros[]{
+    return this.dataLocalService.getLocalRegistros;
   }
 
   constructor(private dataLocalService:DataLocalService) {}
 
-   
-  abrirRegistro(content, format ){
-    const registro: Registro = new Registro(format,content);
+  abrirRegistro(param1, param2 ){
+    const registro: Registro = new Registro(param1,param2);
     this.dataLocalService.abrirRegistro(registro);
-    this.dataLocalService.guardarRegistro(registro.format, registro.content);
+    this.dataLocalService.guardarRegistro(registro);
   }
+
 }

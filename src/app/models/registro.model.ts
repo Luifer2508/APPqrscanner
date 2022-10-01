@@ -1,38 +1,40 @@
-export class Registro{
+export class Registro {
 
     public format : string;
-    public content:string;
-    public type:string;
-    public icon:string;
-    public created:Date;
-
-    constructor(format:string, content:string){
-        this.format = format;
-        this.content = content;
-        this.created = new Date();
-        this.determinarTipo();
+    public text : string;
+    public type : string;
+    public icon : string;
+    public created : Date;
+  
+    constructor (format:string, text:string){
+  
+      this.format = format;
+      this.text = text;
+      this.created = new Date();
+      this.determinarTipo();
+  
     }
-
-    private determinarTipo()
-    {
-        const inicioTexto = this.content.substring(0,4);
-        
-        
-        switch(inicioTexto)
-        {
-            case 'http' : 
-                this.type = 'http',
-                this.icon = 'globe'
-            break;
-            case  'geo:' : 
-                this.type = 'geo',
-                this.icon = 'map-outline'
-            break;
-            default : 
-                this.type = 'undefined',
-                this.icon = 'create'
-        }
-
+  
+    private determinarTipo(){
+  
+      const inicioTexto = this.text.substring(0,4);
+      console.log(inicioTexto);
+      switch (inicioTexto) {
+        case "http":
+          this.type = "http",
+          this.icon = "globe"
+          break;
+  
+        case "geo:":
+          this.type = "geo",
+          this.icon = "map-outline"
+          break;
+  
+        default:
+          this.type = "undefined",
+          this.icon = "create"
+          break;
+      }
     }
-
-}
+  
+  }
